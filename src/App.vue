@@ -6,7 +6,7 @@
         <NewEmployeeModal :is-shown="modalIsShown" :employees="employees" @save="onEmployeeSave" />
       </template>
       <Table 
-        :columns="['name', 'phone', 'bossId']" 
+        :columns="columns" 
         :items="employees"
         key-field="id"
         parent-key-field="bossId"
@@ -48,6 +48,20 @@
           saveEmployee(newEmployee);
           this.modalIsShown = false;
           this.employees = getEmployees();
+      }
+    },
+    computed: {
+      columns() {
+        return [
+          {
+            key: 'name',
+            label: 'Имя'
+          },
+          {
+            key: 'phone',
+            label: 'Телефон'
+          }
+        ];
       }
     }
   }

@@ -5,12 +5,12 @@
             return {
                 whichItemsOpen: [],
                 sortedColName: null,
-                isSortAsc: false,
+                sortIsAsc: false,
             }
         },
         methods: {
             createRow(item, depth) {
-               return this.$createElement('b-tr', this.columns.map(col => this.createTD(item, col, depth)))
+               return this.$createElement('b-tr', this.columns.map(col => this.createTD(item, col.key, depth)))
             },
             createTD(item, col, depth) {
                 return this.$createElement('b-td', 
@@ -23,54 +23,60 @@
                     })
                 );
             },
+            getKey(item) {
+                return item[this.keyField];
+            },
+            getParentKey(item) {
+                return item[this.parentKeyField];
+            },
             sort(colName) {
-                this.isSortAsc = this.sortedColName === colName ? !this.isSortAsc : true;
+                this.sortIsAsc = this.sortedColName === colName ? !this.sortIsAsc : true;
 
                 this.sortedColName = colName;
             },
             hasChildren(item) {
-                return item[this.keyField] in this.childrenItems
+                return this.getKey(item) in this.childrenItems
             },
             createRootAndChildrenRows(item, depth = 0) {
                 let result = [];
                 result.push(this.createRow(item, depth));
 
                 if (this.hasChildren(item) && this.isExpanded(item)) {
-                    this.childrenItems[item[this.keyField]].forEach(child =>  {
+                    this.childrenItems[this.getKey(item)].forEach(child =>  {
                         result.push(this.createRootAndChildrenRows(child, depth + 1));
                     })
                 }
                 return result;
             },
             isExpanded(item) {
-                return this.whichItemsOpen.includes(item[this.keyField]);
+                return this.whichItemsOpen.includes(this.getKey(item));
             },
             toggleExpand(item) {
                 if (this.isExpanded(item)) {
-                    const index = this.whichItemsOpen.indexOf(item[this.keyField]);
+                    const index = this.whichItemsOpen.indexOf(this.getKey(item));
                     this.whichItemsOpen.splice(index, 1);
                 } else {
-                    this.whichItemsOpen.push(item[this.keyField])
+                    this.whichItemsOpen.push(this.getKey(item))
                 }
             }
 
         },
         computed: {
             rootItems() {
-                return this.sortedTable.filter(item => item[this.parentKeyField] === null)
+                return this.sortedTable.filter(item => this.getParentKey(item) === null)
             },
             childrenItems() {
                 let result = {};
                 let currentValue;
 
                 this.sortedTable.forEach(item => {
-                    currentValue = item[this.parentKeyField];
+                    currentValue = this.getParentKey(item);
 
                     if (!(currentValue in result)) {
                         result[currentValue] = [];
                     }
 
-                    if (currentValue === item[this.parentKeyField]) {
+                    if (currentValue === this.getParentKey(item)) {
                         result[currentValue].push(item);
                     }
                 })
@@ -79,7 +85,7 @@
             sortedTable() {
                 let items = [...this.items]
                 return items.sort((a, b) => {
-                    if(this.isSortAsc) {
+                    if(this.sortIsAsc) {
                         return a[this.sortedColName] > b[this.sortedColName] ? 1 : -1;
                     } else {
                         return a[this.sortedColName] < b[this.sortedColName] ? 1 : -1;
@@ -91,9 +97,9 @@
             return this.$createElement('b-table-simple', [
                 this.$createElement('b-tr', this.columns.map(col => this.$createElement('b-th',{ 
                     on:{
-                        click:() => this.sort(col),
+                        click:() => this.sort(col.key),
                     }
-                }, col))),
+                }, col.label))),
                 this.rootItems.map(item => this.createRootAndChildrenRows(item)),
             ]);
         }
