@@ -76,9 +76,7 @@
                         result[currentValue] = [];
                     }
 
-                    if (currentValue === this.getParentKey(item)) {
-                        result[currentValue].push(item);
-                    }
+                    result[currentValue].push(item);    
                 })
                 return result;
             },
