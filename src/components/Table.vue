@@ -96,6 +96,10 @@
                 this.$createElement('b-tr', this.columns.map(col => this.$createElement('b-th',{ 
                     on:{
                         click:() => this.sort(col.key),
+                    },
+                    class: {
+                        asc: this.sortIsAsc && this.sortedColName === col.key,
+                        desc: !this.sortIsAsc && this.sortedColName === col.key
                     }
                 }, col.label))),
                 this.rootItems.map(item => this.createRootAndChildrenRows(item)),
@@ -103,3 +107,12 @@
         }
     }
 </script>
+
+<style scoped>
+	.asc::before {
+		content: "▲";
+	}
+	.desc::before {
+		content: "▼";
+	}
+</style>
